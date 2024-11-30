@@ -74,26 +74,26 @@ pstrcat:
 .type utils @function
 .global utils
 	print_int:
-		lea num_prompt(%rip), %rdi	# Loads the seeds string into rdi
-		mov num_guess, %rsi
+		lea int_prompt(%rip), %rdi	# Loads the seeds string into rdi
+		mov %rsp, %rsi
 		xor %rax, %rax				# Cleans rax
 		call printf					# Calling printf function
 
     print_str:
-        lea win_msg2, %rdi			# Loads the message prompt into rdi
+        lea str_msg, %rdi			# Loads the message prompt into rdi
 		xor	%rax, %rax				# Cleans rax
 		call printf					# Prints the message prompt with function
 		call line_down
 
     scan_str:
-        lea chr_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
-    	lea double_answer(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
+        lea str_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
+    	lea len_msg(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
     	xor %rax, %rax				# We clean rax
     	call scanf					# Calling scanf function
 
     scan_int:
-        lea num_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
-    	lea seed_val(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
+        lea int_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
+    	lea str_msg(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
     	xor %rax, %rax				# We clean rax
     	call scanf					# Calling scanf function
 
