@@ -5,6 +5,8 @@ len_msg:                                                .asciz "length: "
 str_msg:                                                .asciz "string: "
 too_long_msg:                                           .asciz "cannot concatenate strings! \n"
 go_down:                                                .asciz "\n"
+len_format1:                                            .asciz "first pstring length: %d, "
+len_format2:                                            .asciz "second pstring length: %d\n"
 
 .section	.text
 .globl		main
@@ -27,11 +29,24 @@ pstrlen:
     pushq	%rbp
 	movq	%rsp,	%rbp
 
-    lea int_prompt(%rip), %rdi  # Use int_prompt as example output
-    movl $31, %esi              # Example integer to print
-    xor %eax, %eax              # Clear %rax
-    call printf
-	call line_down
+	# Makes sure that the registers are clean
+	xorq %rbx, %rbx
+	xorq %rcx, %rcx
+	
+	# Moves only the first bit of where rdi and rsi are pointing, meaning the string's length
+	movzbq (%rsi), %rcx
+	movzbq (%rdi), %rbx  
+	
+	# Prints
+	lea len_format1(%rip), %rdi	# Loads the seeds string into rdi
+	mov %rcx, %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+    
+    lea len_format2(%rip), %rdi	# Loads the seeds string into rdi
+	mov %rbx, %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
 	
     popq	%rbp
 	ret

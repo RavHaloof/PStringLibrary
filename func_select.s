@@ -49,13 +49,20 @@ run_func:
     movq (%rsp, %rax, 8), %rcx  # Load handler address based on index
     jmp *%rcx                   # Jump to the handler
 
+# pstrlen
 handle_31:
-    # Example handler for case 31
+    # Moves the saved pointers to the struct in rdi and rsi, and sends them to the function
+    mov 72(%rsp), %rdi
+    mov 64(%rsp), %rsi
     call pstrlen
-    jmp end_run_func
 
+    jmp end_run_func
+    
+# switchCase
 handle_33:
-    # Example handler for case 33
+    # Moves the saved pointers to the struct in rdi and rsi, and sends them to the function
+    mov 72(%rsp), %rdi
+    mov 64(%rsp), %rsi
     call swapCase
     jmp end_run_func
 
