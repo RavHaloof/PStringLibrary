@@ -14,13 +14,13 @@ pstrcat_num:                                            .long 37
 .type		run_func, @function
 
     run_func:
+
         pushq %rbp
         movq %rsp, %rbp
 
-        subq $8, %rsp                # Align %rsp (since pushq misaligns by 8 bytes)
         # Prepare `printf` call
         lea int_prompt(%rip), %rdi    # Load address of format string into %rdi
-        movl $42, %esi               # Example integer to print (matches `%d`)
+        mov $42, %rsi               # Example integer to print (matches `%d`)
         xor %eax, %eax                # Clear %rax for variadic function calls
         call printf                   # Call `printf`
 
@@ -106,7 +106,7 @@ pstrcat_num:                                            .long 37
         mov $0, %rax
         movq %rbp, %rsp
         popq %rbp
-        addq $64, %rsp          # Reset the stack
+        addq $48, %rsp          # Reset the stack
         ret
 
 
