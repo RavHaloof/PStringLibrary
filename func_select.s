@@ -5,6 +5,8 @@ int_prompt:					                            .asciz "%d"
 str_prompt:					                            .asciz "%s"
 min_option:                                             .long 31
 max_option:                                             .long 37
+swap_format_len:                                        .asciz "length: %d "
+swap_format_string:                                     .asciz "string: %s\n"
 .section .text
 .global run_func
 .type run_func, @function
@@ -32,8 +34,8 @@ run_func:
     movq $invalid_option, 40(%rsp)          # Bad answer
     movq $invalid_option, 48(%rsp)          # Bad answer
     movq $handle_37, 56(%rsp)               # Case 37
-    movq %rsi, 64(%rsp)                     # First pointer to string 
-    movq %rdx, 72(%rsp)                     # Second pointer to string
+    movq %rsi, 64(%rsp)                     # First pointer to first string 
+    movq %rdx, 72(%rsp)                     # First pointer to second string
 
     # In case the answer is less than 31 (invalid)
     cmp min_option(%rip), %eax
@@ -60,10 +62,24 @@ handle_31:
     
 # switchCase
 handle_33:
-    # Moves the saved pointers to the struct in rdi and rsi, and sends them to the function
-    mov 72(%rsp), %rdi
+    # Moves the saved pointers to the struct in rsi and sends them to the function
     mov 64(%rsp), %rsi
+
     call swapCase
+
+    # Prints the changed string 1
+    lea swap_format_string(%rip), %rdi	# Loads the seeds string into rdi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    # Same as before but with the second string
+    mov 72(%rsp), %rsi
+    call swapCase
+    # Prints the changed string 2
+    lea swap_format_string(%rip), %rdi	# Loads the seeds string into rdi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
     jmp end_run_func
 
 handle_34:
