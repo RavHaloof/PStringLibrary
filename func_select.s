@@ -3,7 +3,8 @@
 int_prompt:                                             .asciz "Enter a number: %d\n"
 .global int_prompt
 str_prompt:                                             .asciz "kill me"
-
+min_option:                                             .long 31
+max_option:                                             .long 37
 .section .text
 .global run_func
 .type run_func, @function
@@ -14,31 +15,33 @@ run_func:
     movq %rsp, %rbp
 
     //Moves the user's choice to rbx, so it doesn't get overriden
-    mov %rdi, %rbx
-
-    lea int_prompt(%rip), %rdi   # Load format string for `%ld`
-    movq %rbx, %rsi              # Move 64-bit signed value from %rdi to %rsi
-    xor %eax, %eax               # Clear %rax for variadic function calls
-    call printf                  # Print the 64-bit signed integer
-
-    # Prepare `printf` call
-    lea int_prompt(%rip), %rdi   # Load address of format string into %rdi
-    movl $42, %esi               # Example integer to print (matches `%d`)
-    xor %eax, %eax               # Clear %rax for variadic function calls
-    call printf                  # Call `printf`
+    xorq %rax, %rax
+    movl %edi, %eax
 
     # Allocate space on stack for jump table
-    subq $48, %rsp               # Allocate space for the jump table (48 bytes)
+    subq $80, %rsp               # Allocate space for the jump table (48 bytes)
 
     # Setting up jump table using stack
-    movq $invalid_option, (%rsp)        # Default handler
-    movq $handle_31, 8(%rsp)            # Case 31
-    movq $handle_33, 16(%rsp)           # Case 33
-    movq $handle_34, 24(%rsp)           # Case 34
-    movq $handle_37, 32(%rsp)           # Case 37
+    movq $invalid_option, (%rsp)            # Bad answer
+    movq $handle_31, 8(%rsp)                # Case 31
+    movq $invalid_option, 16(%rsp)          # Bad answer
+    movq $handle_33, 24(%rsp)               # Case 33
+    movq $handle_34, 32(%rsp)               # Case 34
+    movq $invalid_option, 40(%rsp)          # Bad answer
+    movq $invalid_option, 48(%rsp)          # Bad answer
+    movq $handle_37, 56(%rsp)               # Case 37
+    movq %rsi, 64(%rsp)                     # First pointer to string 
+    movq %rdx, 72(%rsp)                     # Second pointer to string
 
-    # Example jump to handle_31
-    movl $2, %eax               # Simulate normalized index for case 31
+    cmp min_option(%rip), %eax
+    jl invalid_option
+
+    cmp max_option(%rip), %eax
+    ja invalid_option
+    
+    sub min_option, %eax
+    inc %eax
+    
     movq (%rsp, %rax, 8), %rcx  # Load handler address based on index
     jmp *%rcx                   # Jump to the handler
 
@@ -80,11 +83,10 @@ invalid_option:
     movl $0, %esi               # Example output for invalid choice
     xor %eax, %eax
     call printf
-    jmp end_run_func
 
 end_run_func:
     # Restore stack
-    addq $48, %rsp              # Free space allocated for jump table
+    addq $80, %rsp              # Free space allocated for jump table
     movq %rbp, %rsp             # Restore base pointer
     popq %rbp                   # Restore previous frame pointer
     ret
