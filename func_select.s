@@ -13,6 +13,13 @@ run_func:
     pushq %rbp
     movq %rsp, %rbp
 
+    //Moves the user's choice to rbx, so it doesn't get overriden
+    mov %rdi, %rbx
+
+    lea int_prompt(%rip), %rdi   # Load format string for `%ld`
+    movq %rbx, %rsi              # Move 64-bit signed value from %rdi to %rsi
+    xor %eax, %eax               # Clear %rax for variadic function calls
+    call printf                  # Print the 64-bit signed integer
 
     # Prepare `printf` call
     lea int_prompt(%rip), %rdi   # Load address of format string into %rdi
@@ -31,7 +38,7 @@ run_func:
     movq $handle_37, 32(%rsp)           # Case 37
 
     # Example jump to handle_31
-    movl $1, %eax               # Simulate normalized index for case 31
+    movl $2, %eax               # Simulate normalized index for case 31
     movq (%rsp, %rax, 8), %rcx  # Load handler address based on index
     jmp *%rcx                   # Jump to the handler
 
