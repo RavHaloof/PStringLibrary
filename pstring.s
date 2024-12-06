@@ -5,6 +5,8 @@ len_msg:                                                .asciz "length: "
 str_msg:                                                .asciz "string: "
 too_long_msg:                                           .asciz "cannot concatenate strings! \n"
 go_down:                                                .asciz "\n"
+len_format1:                                            .asciz "first pstring length: %d, "
+len_format2:                                            .asciz "second pstring length: %d\n"
 
 .section	.text
 .globl		main
@@ -26,7 +28,26 @@ main2:
 pstrlen:
     pushq	%rbp
 	movq	%rsp,	%rbp
+
+	# Makes sure that the registers are clean
+	xorq %rbx, %rbx
+	xorq %rcx, %rcx
+	
+	# Moves only the first bit of where rdi and rsi are pointing, meaning the string's length
+	movzbq (%rsi), %rcx
+	movzbq (%rdi), %rbx  
+	
+	# Prints
+	lea len_format1(%rip), %rdi	# Loads the seeds string into rdi
+	mov %rcx, %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
     
+    lea len_format2(%rip), %rdi	# Loads the seeds string into rdi
+	mov %rbx, %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+	
     popq	%rbp
 	ret
 
@@ -35,7 +56,13 @@ pstrlen:
 swapCase:
     pushq	%rbp
 	movq	%rsp,	%rbp
-    
+
+    lea int_prompt(%rip), %rdi
+    movl $33, %esi
+    xor %eax, %eax
+    call printf
+	call line_down
+
     popq	%rbp
 	ret
 
@@ -44,7 +71,13 @@ swapCase:
 pstrijcpy:
     pushq	%rbp
 	movq	%rsp,	%rbp
-    
+
+	lea int_prompt(%rip), %rdi
+    movl $34, %esi
+    xor %eax, %eax
+    call printf
+    call line_down
+
     popq	%rbp
 	ret
 
@@ -54,6 +87,12 @@ pstrcat:
     pushq	%rbp
 	movq	%rsp,	%rbp
     
+	lea int_prompt(%rip), %rdi
+    movl $37, %esi
+    xor %eax, %eax
+    call printf
+	call line_down
+
     popq	%rbp
 	ret
 
@@ -84,16 +123,4 @@ pstrcat:
 		xor	%rax, %rax				# Cleans rax
 		call printf					# Prints the message prompt with function
 		call line_down
-
-    scan_str:
-        lea str_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
-    	lea len_msg(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
-    	xor %rax, %rax				# We clean rax
-    	call scanf					# Calling scanf function
-
-    scan_int:
-        lea int_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
-    	lea str_msg(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
-    	xor %rax, %rax				# We clean rax
-    	call scanf					# Calling scanf function
 
