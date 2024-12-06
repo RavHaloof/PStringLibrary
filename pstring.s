@@ -26,7 +26,13 @@ main2:
 pstrlen:
     pushq	%rbp
 	movq	%rsp,	%rbp
-    
+
+    lea int_prompt(%rip), %rdi  # Use int_prompt as example output
+    movl $31, %esi              # Example integer to print
+    xor %eax, %eax              # Clear %rax
+    call printf
+	call line_down
+	
     popq	%rbp
 	ret
 
@@ -35,7 +41,13 @@ pstrlen:
 swapCase:
     pushq	%rbp
 	movq	%rsp,	%rbp
-    
+
+    lea int_prompt(%rip), %rdi
+    movl $33, %esi
+    xor %eax, %eax
+    call printf
+	call line_down
+
     popq	%rbp
 	ret
 
@@ -44,7 +56,13 @@ swapCase:
 pstrijcpy:
     pushq	%rbp
 	movq	%rsp,	%rbp
-    
+
+	lea int_prompt(%rip), %rdi
+    movl $34, %esi
+    xor %eax, %eax
+    call printf
+    call line_down
+
     popq	%rbp
 	ret
 
@@ -54,6 +72,12 @@ pstrcat:
     pushq	%rbp
 	movq	%rsp,	%rbp
     
+	lea int_prompt(%rip), %rdi
+    movl $37, %esi
+    xor %eax, %eax
+    call printf
+	call line_down
+
     popq	%rbp
 	ret
 

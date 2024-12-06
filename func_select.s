@@ -1,8 +1,8 @@
 .section .rodata
 .global int_prompt
-int_prompt:                                             .asciz "Enter a number: %d\n"
-.global int_prompt
-str_prompt:                                             .asciz "kill me"
+int_prompt:					                            .asciz "%d"
+.global str_prompt
+str_prompt:					                            .asciz "%s"
 min_option:                                             .long 31
 max_option:                                             .long 37
 .section .text
@@ -10,10 +10,12 @@ max_option:                                             .long 37
 .type run_func, @function
 
 run_func:
-    # Prologue
+    # Start
     pushq %rbp
     movq %rsp, %rbp
-
+    # choice -> %rdi
+    # *Pstring1 -> %rsi
+    # *Pstring2 -> %rdx
     //Moves the user's choice to rbx, so it doesn't get overriden
     xorq %rax, %rax
     movl %edi, %eax
@@ -33,48 +35,38 @@ run_func:
     movq %rsi, 64(%rsp)                     # First pointer to string 
     movq %rdx, 72(%rsp)                     # Second pointer to string
 
+    # In case the answer is less than 31 (invalid)
     cmp min_option(%rip), %eax
     jl invalid_option
-
+    # In case the answer is more than 37 (invalid)
     cmp max_option(%rip), %eax
     ja invalid_option
-    
+
+    # Modifies %eax to fit with the jump table
     sub min_option, %eax
     inc %eax
-    
+    # Jumps according to the user's choice, should be noted that bad bases between 31-37 are also handled
     movq (%rsp, %rax, 8), %rcx  # Load handler address based on index
     jmp *%rcx                   # Jump to the handler
 
 handle_31:
     # Example handler for case 31
-    lea int_prompt(%rip), %rdi  # Use int_prompt as example output
-    movl $31, %esi              # Example integer to print
-    xor %eax, %eax              # Clear %rax
-    call printf
+    call pstrlen
     jmp end_run_func
 
 handle_33:
     # Example handler for case 33
-    lea int_prompt(%rip), %rdi
-    movl $33, %esi
-    xor %eax, %eax
-    call printf
+    call swapCase
     jmp end_run_func
 
 handle_34:
     # Example handler for case 34
-    lea int_prompt(%rip), %rdi
-    movl $34, %esi
-    xor %eax, %eax
-    call printf
+    call pstrijcpy
     jmp end_run_func
 
 handle_37:
     # Example handler for case 37
-    lea int_prompt(%rip), %rdi
-    movl $37, %esi
-    xor %eax, %eax
-    call printf
+    call pstrcat
     jmp end_run_func
 
 invalid_option:
