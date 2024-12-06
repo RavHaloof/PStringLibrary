@@ -85,15 +85,3 @@ pstrcat:
 		call printf					# Prints the message prompt with function
 		call line_down
 
-    scan_str:
-        lea str_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
-    	lea len_msg(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
-    	xor %rax, %rax				# We clean rax
-    	call scanf					# Calling scanf function
-
-    scan_int:
-        lea int_prompt(%rip), %rdi	# We add the prefix to scan the input correctly
-    	lea str_msg(%rip), %rsi	# We put the seed number in rsi to be accepted by the scan
-    	xor %rax, %rax				# We clean rax
-    	call scanf					# Calling scanf function
-
