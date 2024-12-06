@@ -10,7 +10,7 @@ pstrijcpy_num:                                          .long 34
 pstrcat_num:                                            .long 37
 
 .section	.text
-.globl		run_func
+.global		run_func
 .type		run_func, @function
 
     run_func:
@@ -18,22 +18,10 @@ pstrcat_num:                                            .long 37
         pushq %rbp
         movq %rsp, %rbp
 
-        # Prepare `printf` call
-        lea int_prompt(%rip), %rdi    # Load address of format string into %rdi
-        mov $42, %rsi               # Example integer to print (matches `%d`)
-        xor %eax, %eax                # Clear %rax for variadic function calls
-        call printf                   # Call `printf`
-
         # choice -> %rdi
         # *Pstring1 -> %rsi
         # *Pstring2 -> %rdx
         subq $48, %rsp          # Allocate space on stack for jump table
-
-        lea int_prompt(%rip), %rdi	# Loads the seeds string into rdi
-        xor %rax, %rax				# Cleans rax
-		mov %rax, %rsi
-		xor %rax, %rax				# Cleans rax
-		call printf					# Calling printf function
 
         # Setting up jump table using stack
         movq $invalid_option, (%rsp)       # Any option which is not the specified numbers
@@ -47,6 +35,7 @@ pstrcat_num:                                            .long 37
         movl %edi, %ebx          # Move choice to ebx
         cmpl $31, %ebx           # Check if choice < 31
         jl invalid_option        # Jump to invalid if so
+        
         subl $31, %ebx           # Normalize: subtract 31
         cmpl $6, %ebx            # Check if choice > 37
         ja invalid_option        # Jump to invalid if so
