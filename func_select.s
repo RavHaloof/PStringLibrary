@@ -7,6 +7,7 @@ min_option:                                             .long 31
 max_option:                                             .long 37
 swap_format_len:                                        .asciz "length: %d "
 swap_format_string:                                     .asciz "string: %s\n"
+switch_prompt_len:										.asciz "length: %d, "
 .section .text
 .global run_func
 .type run_func, @function
@@ -23,7 +24,7 @@ run_func:
     movl %edi, %eax
 
     # Allocate space on stack for jump table
-    subq $80, %rsp               # Allocate space for the jump table (48 bytes)
+    subq $96, %rsp               # Allocate space for the jump table (48 bytes)
 
     # Setting up jump table using stack
     movq $invalid_option, (%rsp)            # Bad answer
@@ -63,8 +64,14 @@ handle_31:
 # switchCase
 handle_33:
     # Moves the saved pointers to the struct in rsi and sends them to the function
-    mov 64(%rsp), %rsi
+    mov 64(%rsp), %rax
+    
+    lea swap_format_len(%rip), %rdi	# Loads the seeds string into rdi
+    movzbq (%rax), %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
 
+    mov 64(%rsp), %rsi
     call swapCase
 
     # Prints the changed string 1
@@ -73,8 +80,16 @@ handle_33:
 	call printf					# Calling printf function
 
     # Same as before but with the second string
+    mov 72(%rsp), %rax
+    
+    lea swap_format_len(%rip), %rdi	# Loads the seeds string into rdi
+    movzbq (%rax), %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
     mov 72(%rsp), %rsi
     call swapCase
+
     # Prints the changed string 2
     lea swap_format_string(%rip), %rdi	# Loads the seeds string into rdi
 	xor %rax, %rax				# Cleans rax
@@ -101,7 +116,7 @@ invalid_option:
 
 end_run_func:
     # Restore stack
-    addq $80, %rsp              # Free space allocated for jump table
+    addq $96, %rsp              # Free space allocated for jump table
     movq %rbp, %rsp             # Restore base pointer
     popq %rbp                   # Restore previous frame pointer
     ret

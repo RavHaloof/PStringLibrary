@@ -62,7 +62,6 @@ pstrlen:
 swapCase:
     pushq	%rbp
 	movq	%rsp,	%rbp
-
 	# Makes sure that the registers are clean
 	xorq %r8, %r8
 
