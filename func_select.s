@@ -11,6 +11,7 @@ len_format1:                                            .asciz "first pstring "
 len_format2:                                            .asciz ", second pstring "
 invalid_option_format:                                  .asciz "invalid option!\n"
 invalid_input_format:                                   .asciz "invalid input!\n"
+invalid_concat_format:                                  .asciz "cannot concatenate strings!\n"
 .section .text
 .global run_func
 .type run_func, @function
@@ -106,7 +107,7 @@ handle_34:
     # Load first string's address and contents
     movq 64(%rsp), %rsi
     movzbq (%rsi), %r12           # Load entire 64-bit value into %rdx
-
+    # Load second string's address and contents
     movq 72(%rsp), %rsi
     movzbq (%rsi), %r13           # Load entire 64-bit value into %rdx
 
@@ -174,18 +175,67 @@ handle_34:
     # Ends the function
     jmp end_pstrijcpy
 
-# In case the index values were illegal (too small or too large)
-invalid_case:
+    # In case the index values were illegal (too small or too large)
+    invalid_case:
     lea invalid_input_format(%rip), %rdi
     xor %rax, %rax
     call printf
-# End
-end_pstrijcpy:
+    # End
+    end_pstrijcpy:
     jmp end_run_func
 
 handle_37:
-    # Example handler for case 37
+    # Load first string's address and contents
+    movq 64(%rsp), %rdi
+    movzbq (%rdi), %rcx           # Load entire 64-bit value into %rcx
+
+    movq 72(%rsp), %rsi
+    movzbq (%rsi), %rdx           # Load entire 64-bit value into %rdx
+
+    # Checks whether the two strings' lengths are above 254
+    mov %rcx, %rax
+    add %rdx, %rax
+    cmp $254, %rax
+    # If so, skips concat
+    ja invalid_concat
+
     call pstrcat
+    # Increases the OG string's length
+    movb (%rdi), %bl
+    movb (%rsi), %cl
+    addb %cl, %bl
+    movb %bl, (%rdi)
+    # Jumps to the end of the function 
+    jmp end_concat
+    
+    # In case the strongs were too long to concat
+    invalid_concat:
+    lea invalid_concat_format(%rip), %rdi
+    xor %rax, %rax
+    call printf
+
+    end_concat:
+
+     # Calls pstrlen to print the length of first pstring
+    mov 64(%rsp), %rdi
+    call pstrlen
+
+    # Prints the changed string 1
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
+    mov 64(%rsp), %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    # Calls pstrlen to print the length of first pstring
+    mov 72(%rsp), %rdi
+    call pstrlen
+
+    # Prints the string 2
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
+    mov 72(%rsp), %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
     jmp end_run_func
 
 invalid_option:

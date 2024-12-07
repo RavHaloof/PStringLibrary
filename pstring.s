@@ -142,13 +142,31 @@ pstrijcpy:
 pstrcat:
     pushq	%rbp
 	movq	%rsp,	%rbp
-    
-	lea int_prompt(%rip), %rdi
-    movl $37, %esi
-    xor %eax, %eax
-    call printf
-	call line_down
+	# Saving all safe registers due to function calling conventions
+    pushq %rbx
+	
+	# Moving the counter to rcx, rbx is the pointer to the affected string, rdx the pointer to the affecting string
+	mov %rcx, %rbx							# Moves the first string's last index to rbx
+	mov %rdx, %rcx							# Moves the letter count or rdx to rcx
+	xorq %rdx, %rdx							# Sets rdx to 0
+	inc %rbx								# Increases rbx
+	inc %rcx								# Increases rcx
+	strcat_loop:
 
+	# Moving the bit in the second string at rbx place to al, and al to the first string at the same place
+	movb (%rsi, %rdx), %al
+	movb %al, (%rdi, %rbx)
+	# Moves on to the next index
+	inc %rbx
+	inc %rdx
+	# Decreases rcx and checks the loop status
+	dec %rcx									# Decreases rcx by 1
+	jrcxz strcat_out							# If rcx is 0, ends
+	jmp strcat_loop
+
+	# End
+	strcat_out:
+	popq    %rbx
     popq	%rbp
 	ret
 
