@@ -176,7 +176,7 @@ handle_34:
 
 # In case the index values were illegal (too small or too large)
 invalid_case:
-    lea invalid_option_format(%rip), %rdi
+    lea invalid_input_format(%rip), %rdi
     xor %rax, %rax
     call printf
 # End
