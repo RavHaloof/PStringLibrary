@@ -33,15 +33,11 @@ pstrlen:
     pushq	%rbp
 	movq	%rsp,	%rbp
 
-	# Makes sure that the registers are clean
-	xorq %rcx, %rcx
-	
 	# Moves only the first bit of where rdi and rsi are pointing, meaning the string's length
-	movzbq (%rdi), %rcx
+	movzbq (%rdi), %rsi
 	
 	# Prints the first string's length
 	lea len_format(%rip), %rdi	# Loads the seeds string into rdi
-	mov %rcx, %rsi
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
 	
@@ -73,6 +69,7 @@ swapCase:
 	cmpb $97, (%r8)							# Compares the highest possible letter in uppercase
 	jl end									# If lower, then the char is not a letter, skips to end
 	# In case it's a lower letter
+	lower:
 	subb $32, (%r8)							# Decreases the ascii value by 32, resulting in upper case
 	jmp end									# Jumps to end
 
@@ -98,11 +95,44 @@ pstrijcpy:
     pushq	%rbp
 	movq	%rsp,	%rbp
 
-	lea int_prompt(%rip), %rdi
-    movl $34, %esi
-    xor %eax, %eax
-    call printf
-    call line_down
+	# Saving all safe registers due to function calling conventions
+	pushq %rbx
+	pushq %r8
+	pushq %r9
+	
+	# Saving the start index
+	mov %rcx, %rbx
+	# Saving the amount of times we'll need to loop (%rdx - %rcx)
+	mov %rdx, %rax
+	sub %rcx, %rax
+	# And moving it back to %rcx
+	mov %rax, %rcx
+	# Saving the structs on r8 and r9
+	movq %rdi, %r8
+	movq %rsi, %r9
+	# To include the last letter in the string
+	inc %rcx
+	# Since the first letter of the array is actually the string's length
+	inc %rbx
+	ijcpy_loop:
+
+	# Moving the bit in the second string at rbx place to al, and al to the first string at the same place
+	movb (%r9, %rbx), %al
+	movb %al, (%r8, %rbx)
+	# Moves on to the next index
+	inc %rbx
+	# Decreases rcx and checks the loop status
+	subq $1, %rcx							# Decreases rcx by 1
+	jrcxz ij_out							# If rcx is 0, ends
+	jmp ijcpy_loop
+
+	# Ends the function
+	ij_out:
+
+	# Returns all the calling convention registers
+	popq %rbx
+	popq %r8
+	popq %r9
 
     popq	%rbp
 	ret

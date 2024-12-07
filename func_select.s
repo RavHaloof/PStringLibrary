@@ -1,6 +1,6 @@
 .section .rodata
 .global int_prompt
-int_prompt:					                            .asciz "%d"
+int_prompt:					                            .asciz "%ld"
 .global str_prompt
 str_prompt:					                            .asciz "%s"
 min_option:                                             .long 31
@@ -9,6 +9,8 @@ string_format:                                          .asciz ", string: %s\n"
 switch_prompt_len:										.asciz "length: %d, "
 len_format1:                                            .asciz "first pstring "
 len_format2:                                            .asciz ", second pstring "
+invalid_option_format:                                  .asciz "invalid option!\n"
+invalid_input_format:                                   .asciz "invalid input!\n"
 .section .text
 .global run_func
 .type run_func, @function
@@ -59,7 +61,7 @@ handle_31:
     lea len_format1(%rip), %rdi	# Loads the seeds string into rdi
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
-
+    
     mov 64(%rsp), %rdi
     call pstrlen
 
@@ -99,9 +101,86 @@ handle_33:
 	call printf					# Calling printf function
 
     jmp end_run_func
-
+#Pstrijcpy
 handle_34:
+    # Load first string's address and contents
+    movq 64(%rsp), %rsi
+    movzbq (%rsi), %r12           # Load entire 64-bit value into %rdx
+
+    movq 72(%rsp), %rsi
+    movzbq (%rsi), %r13           # Load entire 64-bit value into %rdx
+
+    lea int_prompt(%rip), %rdi   # Format string
+    lea 80(%rsp), %rsi           # Address of first number
+    xor %rax, %rax
+    call scanf                   # Read input
+    movq 80(%rsp), %rbx          # Store first input in %rbx
+
+    lea int_prompt(%rip), %rdi   # Format string
+    lea 88(%rsp), %rsi           # Address of first number
+    xor %rax, %rax
+    call scanf                   # Read input
+    movq 88(%rsp), %r15          # Store first input in %r15
+
+    cmpq %rbx, %r12
+    jle invalid_case              # Jump if %rbx > %r12
+
+    cmpq %rbx, %r13
+    jle invalid_case              # Jump if %rbx > %r13
+
+    cmpq %r15, %r12
+    jle invalid_case              # Jump if %r15 > %r12
+
+    cmpq %r15, %r13
+    jle invalid_case              # Jump if %r15 > %r13
+
+    cmpq %rbx, %r15
+    jl invalid_case              # Jump if %rbx > %r15
+
+    cmpq $0, %rbx
+    jl invalid_case              # Jump if 0 > %rbx (negative)
+
+    cmpq $0, %r15
+    jl invalid_case              # Jump if 0 > %r15 (negative)
+
+
+    # Loads all the values we need to pstrijcpy
+    movq 64(%rsp), %rdi          # First string to rdi
+    movq 72(%rsp), %rsi          # Second string to rsi
+    mov %rbx, %rcx               # First index to rcx
+    mov %r15, %rdx               # Second index to rdx
     call pstrijcpy
+
+    # Calls pstrlen to print the length of first pstring
+    mov 64(%rsp), %rdi
+    call pstrlen
+
+    # Prints the changed string 1
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
+    mov 64(%rsp), %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    # Calls pstrlen to print the length of first pstring
+    mov 72(%rsp), %rdi
+    call pstrlen
+
+    # Prints the string 2
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
+    mov 72(%rsp), %rsi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    # Ends the function
+    jmp end_pstrijcpy
+
+# In case the index values were illegal (too small or too large)
+invalid_case:
+    lea invalid_option_format(%rip), %rdi
+    xor %rax, %rax
+    call printf
+# End
+end_pstrijcpy:
     jmp end_run_func
 
 handle_37:
@@ -111,9 +190,8 @@ handle_37:
 
 invalid_option:
     # Default handler
-    lea int_prompt(%rip), %rdi
-    movl $0, %esi               # Example output for invalid choice
-    xor %eax, %eax
+    lea invalid_option_format(%rip), %rdi	# Loads the seeds string into rdi
+	xor %rax, %rax				# Cleans rax
     call printf
 
 end_run_func:
