@@ -5,8 +5,7 @@ int_prompt:					                            .asciz "%d"
 str_prompt:					                            .asciz "%s"
 min_option:                                             .long 31
 max_option:                                             .long 37
-swap_format_len:                                        .asciz "length: %d "
-swap_format_string:                                     .asciz "string: %s\n"
+string_format:                                          .asciz ", string: %s\n"
 switch_prompt_len:										.asciz "length: %d, "
 len_format1:                                            .asciz "first pstring "
 len_format2:                                            .asciz ", second pstring "
@@ -75,35 +74,27 @@ handle_31:
     
 # switchCase
 handle_33:
+    # Calls pstrlen to print the length of first pstring
+    mov 64(%rsp), %rdi
+    call pstrlen
     # Moves the saved pointers to the struct in rsi and sends them to the function
-    mov 64(%rsp), %rax
-    
-    lea swap_format_len(%rip), %rdi	# Loads the seeds string into rdi
-    movzbq (%rax), %rsi
-	xor %rax, %rax				# Cleans rax
-	call printf					# Calling printf function
-
     mov 64(%rsp), %rsi
     call swapCase
 
     # Prints the changed string 1
-    lea swap_format_string(%rip), %rdi	# Loads the seeds string into rdi
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
 
     # Same as before but with the second string
-    mov 72(%rsp), %rax
-    
-    lea swap_format_len(%rip), %rdi	# Loads the seeds string into rdi
-    movzbq (%rax), %rsi
-	xor %rax, %rax				# Cleans rax
-	call printf					# Calling printf function
+    mov 72(%rsp), %rdi
+    call pstrlen
 
     mov 72(%rsp), %rsi
     call swapCase
 
     # Prints the changed string 2
-    lea swap_format_string(%rip), %rdi	# Loads the seeds string into rdi
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
 
