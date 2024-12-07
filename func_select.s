@@ -8,6 +8,8 @@ max_option:                                             .long 37
 swap_format_len:                                        .asciz "length: %d "
 swap_format_string:                                     .asciz "string: %s\n"
 switch_prompt_len:										.asciz "length: %d, "
+len_format1:                                            .asciz "first pstring "
+len_format2:                                            .asciz ", second pstring "
 .section .text
 .global run_func
 .type run_func, @function
@@ -55,10 +57,20 @@ run_func:
 # pstrlen
 handle_31:
     # Moves the saved pointers to the struct in rdi and rsi, and sends them to the function
-    mov 72(%rsp), %rdi
-    mov 64(%rsp), %rsi
+    lea len_format1(%rip), %rdi	# Loads the seeds string into rdi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    mov 64(%rsp), %rdi
     call pstrlen
 
+    lea len_format2(%rip), %rdi	# Loads the seeds string into rdi
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    mov 72(%rsp), %rdi
+    call pstrlen
+    call line_down
     jmp end_run_func
     
 # switchCase
@@ -98,7 +110,6 @@ handle_33:
     jmp end_run_func
 
 handle_34:
-    # Example handler for case 34
     call pstrijcpy
     jmp end_run_func
 

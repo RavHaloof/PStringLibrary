@@ -5,8 +5,7 @@ len_msg:                                                .asciz "length: "
 str_msg:                                                .asciz "string: "
 too_long_msg:                                           .asciz "cannot concatenate strings! \n"
 go_down:                                                .asciz "\n"
-len_format1:                                            .asciz "first pstring length: %d, "
-len_format2:                                            .asciz "second pstring length: %d\n"
+len_format:                                             .asciz "length: %d"
 lowest_CAPS:											.asciz "A"
 highest_normal:											.asciz "z"
 highest_CAPS:											.asciz "Z"
@@ -35,22 +34,14 @@ pstrlen:
 	movq	%rsp,	%rbp
 
 	# Makes sure that the registers are clean
-	xorq %rbx, %rbx
 	xorq %rcx, %rcx
 	
 	# Moves only the first bit of where rdi and rsi are pointing, meaning the string's length
-	movzbq (%rsi), %rcx
-	movzbq (%rdi), %rbx  
+	movzbq (%rdi), %rcx
 	
 	# Prints the first string's length
-	lea len_format1(%rip), %rdi	# Loads the seeds string into rdi
+	lea len_format(%rip), %rdi	# Loads the seeds string into rdi
 	mov %rcx, %rsi
-	xor %rax, %rax				# Cleans rax
-	call printf					# Calling printf function
-    
-	# Prints the second string's length
-    lea len_format2(%rip), %rdi	# Loads the seeds string into rdi
-	mov %rbx, %rsi
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
 	
