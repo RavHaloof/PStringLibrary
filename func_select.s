@@ -83,7 +83,7 @@ handle_33:
     # Moves the saved pointers to the struct in rsi and sends them to the function
     mov 64(%rsp), %rsi
     call swapCase
-
+    inc %rsi                    # To ignore the length of the string while we print it
     # Prints the changed string 1
     lea string_format(%rip), %rdi	# Loads the seeds string into rdi
 	xor %rax, %rax				# Cleans rax
@@ -97,6 +97,7 @@ handle_33:
     call swapCase
 
     # Prints the changed string 2
+    inc %rsi                    # To ignore the length of the string while we print it
     lea string_format(%rip), %rdi	# Loads the seeds string into rdi
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
@@ -152,26 +153,6 @@ handle_34:
     mov %r15, %rdx               # Second index to rdx
     call pstrijcpy
 
-    # Calls pstrlen to print the length of first pstring
-    mov 64(%rsp), %rdi
-    call pstrlen
-
-    # Prints the changed string 1
-    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
-    mov 64(%rsp), %rsi
-	xor %rax, %rax				# Cleans rax
-	call printf					# Calling printf function
-
-    # Calls pstrlen to print the length of first pstring
-    mov 72(%rsp), %rdi
-    call pstrlen
-
-    # Prints the string 2
-    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
-    mov 72(%rsp), %rsi
-	xor %rax, %rax				# Cleans rax
-	call printf					# Calling printf function
-
     # Ends the function
     jmp end_pstrijcpy
 
@@ -182,6 +163,28 @@ handle_34:
     call printf
     # End
     end_pstrijcpy:
+    # Calls pstrlen to print the length of first pstring
+    mov 64(%rsp), %rdi
+    call pstrlen
+
+    # Prints the changed string 1
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
+    mov 64(%rsp), %rsi
+    inc %rsi                    # To ignore the length of the string while we print it
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
+    # Calls pstrlen to print the length of first pstring
+    mov 72(%rsp), %rdi
+    call pstrlen
+
+    # Prints the string 2
+    lea string_format(%rip), %rdi	# Loads the seeds string into rdi
+    mov 72(%rsp), %rsi
+    inc %rsi                    # To ignore the length of the string while we print it
+	xor %rax, %rax				# Cleans rax
+	call printf					# Calling printf function
+
     jmp end_run_func
 
 handle_37:
@@ -198,8 +201,9 @@ handle_37:
     cmp $254, %rax
     # If so, skips concat
     ja invalid_concat
-
+    inc %rsi
     call pstrcat
+    dec %rsi
     # Increases the OG string's length
     movb (%rdi), %bl
     movb (%rsi), %cl
@@ -216,15 +220,16 @@ handle_37:
 
     end_concat:
 
-     # Calls pstrlen to print the length of first pstring
+    # Calls pstrlen to print the length of first pstring
     mov 64(%rsp), %rdi
     call pstrlen
 
     # Prints the changed string 1
     lea string_format(%rip), %rdi	# Loads the seeds string into rdi
     mov 64(%rsp), %rsi
-	xor %rax, %rax				# Cleans rax
-	call printf					# Calling printf function
+    inc %rsi                    # To ignore the length of the string while we print it
+	xor %rax, %rax				    # Cleans rax
+	call printf					    # Calling printf function
 
     # Calls pstrlen to print the length of first pstring
     mov 72(%rsp), %rdi
@@ -233,6 +238,7 @@ handle_37:
     # Prints the string 2
     lea string_format(%rip), %rdi	# Loads the seeds string into rdi
     mov 72(%rsp), %rsi
+    inc %rsi                    # To ignore the length of the string while we print it
 	xor %rax, %rax				# Cleans rax
 	call printf					# Calling printf function
 
